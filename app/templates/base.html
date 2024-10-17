@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}GuideAndSeek{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- FullCalendar CSS -->
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
+    
+    <!-- FullCalendar JS -->
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
+    <!-- Link the separated JavaScript file -->
+    <script src="{{ url_for('static', filename='js/calendar.js') }}"></script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <!-- Select2 (for dropdowns) -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <!-- Socket.IO for real-time notifications -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
+    
+    <!-- SweetAlert2 for notifications -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+      /* Basic notification styling */
+      .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background-color: #f8f9fa;
+        border: 1px solid #ccc;
+        padding: 10px;
+        border-radius: 5px;
+        display: none;
+        z-index: 1000;
+      }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen bg-gray-100 text-gray-800">
+    <!-- Upper Navigation Bar -->
+    <nav class="bg-[#7F56D9] text-white p-4 shadow">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                {% if current_user.is_authenticated %}
+                <div class="relative group">
+                    <a href="{{ url_for('api.home', user_id=current_user.id) }}" class="hover:text-[#FBBF24]">Home</a>
+                </div>
+                <div class="relative group">
+                    <a href="{{ url_for('api.calendar', user_id=current_user.id) }}" class="hover:text-[#FBBF24]">My Calendar</a>
+                </div>
+                <div class="relative group">
+                    <a href="javascript:void(0);" class="hover:text-[#FBBF24]">Notifications</a>
+                </div>
+                <div class="relative group">
+                    <a href="{{ url_for('api.view_profile', user_id=current_user.id) }}" class="hover:text-[#FBBF24]">Profile</a>
+                </div>
+                <div class="relative group">
+                    <a href="{{ url_for('auth.logout') }}" class="hover:text-[#FBBF24]">Logout</a>
+                </div>
+                {% else %}
+                <div class="relative group">
+                    <a href="{{ url_for('auth.index') }}" class="hover:text-[#FBBF24]">About</a>
+                </div>
+                <div class="relative group">
+                    <a href="{{ url_for('auth.register') }}" class="hover:text-[#FBBF24]">Register</a>
+                </div>
+                <div class="relative group">
+                    <a href="{{ url_for('auth.login') }}" class="hover:text-[#FBBF24]">Login</a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <div class="block md:hidden">
+                <button id="menu-button" class="text-white focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="menu" class="hidden md:hidden flex flex-col space-y-2 p-4">
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('api.home', user_id=current_user.id) }}" class="hover:underline">Home</a>
+                <a href="{{ url_for('api.calendar', user_id=current_user.id) }}" class="hover:underline">My Calendar</a>
+                <a href="#" class="hover:underline">Notifications</a>
+                <a href="{{ url_for('api.view_profile', user_id=current_user.id) }}" class="hover:underline">Profile</a>
+                <a href="{{ url_for('auth.logout') }}" class="hover:underline">Logout</a>
+            {% else %}
+                <a href="{{ url_for('auth.index') }}" class="hover:underline">About</a>
+                <a href="{{ url_for('auth.register') }}" class="hover:underline">Register</a>
+                <a href="{{ url_for('auth.login') }}" class="hover:underline">Login</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="content flex-grow p-4 bg-white shadow-md rounded-md">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Socket.IO Notification Handlers -->
+    <script>
+        var socket = io.connect('http://' + document.domain + ':' + location.port + '/notifications');
+
+        function displayNotification(title, message, icon = 'info') {
+            Swal.fire({
+                title: title,
+                text: message,
+                icon: icon,
+                confirmButtonText: 'OK'
+            });
+        }
+
+        socket.on('new_review', function(data) {
+            displayNotification('New Review', data.message, 'info');
+        });
+
+
+        socket.on('appointment_request', function(data) {
+            displayNotification('New Appointment Request', `${data.student_name} requested an appointment for ${data.appointment_title}`, 'info');
+        });
+
+        socket.on('appointment_confirmation', function(data) {
+            displayNotification('Appointment Confirmed', `Your appointment "${data.appointment_title}" has been confirmed by ${data.teacher_name}`, 'success');
+        });
+
+        socket.on('appointment_declined', function(data) {
+            displayNotification('Appointment Declined', `Your appointment "${data.appointment_title}" has been declined.`, 'warning');
+        });
+
+        const menuButton = document.getElementById('menu-button');
+        const menu = document.getElementById('menu');
+        menuButton.addEventListener('click', () => {
+            menu.classList.toggle('hidden');
+        });
+    </script>
+</body>
+</html>

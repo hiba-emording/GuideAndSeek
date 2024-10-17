@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% from "macros.html" import render_errors %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-center min-h-screen bg-gray-100">
+    <div class="bg-white shadow-lg rounded-lg p-8 max-w-sm w-full">
+        <h1 class="text-2xl font-bold mb-6 text-center">Login</h1>
+        <form method="POST" action="{{ url_for('auth.login') }}">
+            {{ form.hidden_tag() }}
+            <div class="mb-4">
+                {{ form.email.label(class="block text-sm font-medium text-gray-700") }}
+                {{ form.email(class="form-control mt-1 block w-full p-2 border border-gray-300 rounded-md") }}
+                {{ render_errors(form.email) }}
+            </div>
+            <div class="mb-4">
+                {{ form.password.label(class="block text-sm font-medium text-gray-700") }}
+                {{ form.password(class="form-control mt-1 block w-full p-2 border border-gray-300 rounded-md") }}
+                {{ render_errors(form.password) }}
+            </div>
+            <button type="submit" class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 rounded">Login</button>
+        </form>
+        <p class="mt-4 text-center text-sm">
+            Don't have an account? <a href="{{ url_for('auth.register') }}" class="text-blue-500 hover:underline">Register here</a>
+        </p>
+        {% if messages %}
+        <div class="flash-container mt-4">
+            <ul class="flashed-messages space-y-2">
+                {% for category, message in messages %}
+                    <li class="{{ category }} flex justify-between items-center bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-2 rounded">
+                        {{ message }}
+                        <button type="button" class="close-flash text-yellow-500 hover:text-yellow-700" onclick="this.parentElement.style.display='none';">x</button>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
