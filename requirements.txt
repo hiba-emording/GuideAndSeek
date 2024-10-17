@@ -1,0 +1,20 @@
+Flask                # Core web framework
+Flask-SQLAlchemy  # Database ORM for PostgreSQL
+psycopg2-binary         # PostgreSQL adapter
+Flask-Login             # User authentication
+Flask-Bcrypt
+Flask-Migrate
+flask-session
+Flask-WTF               # Forms handling
+Flask-SocketIO        # WebSockets for real-time communication
+eventlet               # For Flask-SocketIO to support async
+Flask-Mail              # Email notifications
+email-validator
+requests               # For Google Meet API and other external APIs
+python-dotenv        # Load environment variables
+gunicorn               # For deployment (running the app in production)
+WTForms              # For building forms
+alembic               # Database migrations
+Jinja2              # Templating engine
+SQLAlchemy           # SQL toolkit and ORM
+gevent              # Asynchronous networking for SocketIO
