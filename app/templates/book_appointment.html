@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mx-auto py-8">
+    <h2 class="text-3xl font-bold text-purple-700">Book an Appointment with {{ teacher.username }}</h2>
+    <form method="POST" class="mt-6 p-6 bg-orange-100 rounded-lg shadow-md">
+        {{ form.hidden_tag() }}
+        
+        <div class="mt-4">
+            {{ form.title.label(class="text-lg font-semibold text-purple-700") }} 
+            {{ form.title(class="form-input mt-1 block w-full border border-purple-300 rounded-md focus:ring focus:ring-purple-500") }}
+        </div>
+        
+        <div class="mt-4">
+            {{ form.description.label(class="text-lg font-semibold text-purple-700") }} 
+            {{ form.description(class="form-textarea mt-1 block w-full border border-purple-300 rounded-md focus:ring focus:ring-purple-500") }}
+        </div>
+        
+        <div class="mt-4">
+            {{ form.material_url.label(class="text-lg font-semibold text-purple-700") }} 
+            {{ form.material_url(class="form-input mt-1 block w-full border border-purple-300 rounded-md focus:ring focus:ring-purple-500") }}
+        </div>
+        
+        <div class="mt-4">
+            {{ form.slot_time.label(class="text-lg font-semibold text-purple-700") }} 
+            {{ form.slot_time(class="form-select mt-1 block w-full border border-purple-300 rounded-md focus:ring focus:ring-purple-500") }}
+        </div>
+
+        <div class="mt-4">
+            {{ form.google_meet_link.label(class="text-lg font-semibold text-purple-700") }} 
+            {{ form.google_meet_link(class="form-input mt-1 block w-full border border-purple-300 rounded-md focus:ring focus:ring-purple-500") }}
+        </div>
+
+        <div class="mt-6">
+            {{ form.submit(class="bg-purple-600 text-white py-2 px-4 rounded hover:bg-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-300") }}
+        </div>
+    </form>
+</div>
+
+<script>
+// This JS can be loaded on the student booking page to refresh available slots dynamically if needed
+
+document.addEventListener('DOMContentLoaded', function() {
+    const daySelect = document.getElementById('day-of-week');
+    const slotsSelect = document.getElementById('slot-time');
+
+    daySelect.addEventListener('change', function() {
+        const selectedDay = this.value;
+
+        // Send AJAX request to fetch available slots for selected day
+        fetch(`/api/available-slots/${selectedDay}`)
+            .then(response => response.json())
+            .then(data => {
+                slotsSelect.innerHTML = '';
+                data.slots.forEach(slot => {
+                    const option = document.createElement('option');
+                    option.value = slot.value;
+                    option.textContent = slot.text;
+                    slotsSelect.appendChild(option);
+                });
+            });
+    });
+});
+</script>
+{% endblock %}

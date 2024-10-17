@@ -1,0 +1,127 @@
+.success {
+    color: green;
+}
+
+.danger {
+    color: red;
+}
+
+.teacher-badge {
+    background-color: #4CAF50;
+    color: white;
+    padding: 5px;
+    border-radius: 3px;
+}
+
+.student-badge {
+    background-color: #2196F3;
+    color: white;
+    padding: 5px;
+    border-radius: 3px;
+}
+
+/* Card container */
+.card {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    max-width: 300px;
+    background-color: #f9f9f9;
+    margin: 10px;
+}
+
+/* Card hover effect */
+.card:hover {
+    transform: translateY(-10px);
+}
+
+/* Profile picture */
+.card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+/* Card content */
+.card-content {
+    padding: 20px;
+    text-align: center;
+}
+
+/* Teacher name */
+.card-content h3 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+/* Field of expertise */
+.card-content p.field {
+    font-size: 16px;
+    margin: 5px 0;
+    color: #555;
+}
+
+/* Rating */
+.card-content p.rating {
+    font-size: 14px;
+    color: #ff9900;
+}
+
+/* Flag and Country */
+.card-content .country {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-content .country img {
+    width: 20px;
+    height: 20px;
+    margin-right: 5px;
+}
+
+.card-content .country p {
+    font-size: 14px;
+    color: #777;
+}
+
+/* Footer info (subjects of interest) */
+.card-content .subjects {
+    font-size: 14px;
+    color: #777;
+    margin-top: 10px;
+}
+
+
+#calendar {
+    max-width: 100%;
+    margin: 40px auto;
+    background-color: white;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.fc .fc-toolbar-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* Style for the hidden appointment detail section */
+#appointment-details {
+    display: none;
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 20px;
+}
+
+.hidden {
+    display: none;
+}

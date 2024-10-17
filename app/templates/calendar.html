@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto p-6 bg-purple-50 rounded-lg shadow-lg">
+  <h2 class="text-3xl font-bold mb-4 text-purple-800">Your Appointments</h2>
+  
+  <!-- Calendar -->
+  <div id="calendar" class="mb-6 bg-light-orange-100 rounded shadow-lg"></div>
+
+  <!-- Appointment Details Section (hidden by default) -->
+  <div id="appointment-details" class="bg-white p-4 shadow rounded hidden">
+    <h3 class="text-xl font-semibold mb-2 text-purple-600" id="appointment-title"></h3>
+    <p id="appointment-description" class="text-orange-700"></p>
+    <p id="appointment-material" class="text-orange-700"></p>
+    <p id="appointment-with" class="text-orange-700"></p>
+    <p><strong class="text-purple-600">Google Meet Link:</strong> <a href="#" id="appointment-meet-link" target="_blank" class="text-blue-500 underline">Join Meeting</a></p>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+    var detailsEl = document.getElementById('appointment-details');
+    var titleEl = document.getElementById('appointment-title');
+    var descriptionEl = document.getElementById('appointment-description');
+    var materialEl = document.getElementById('appointment-material');
+    var withEl = document.getElementById('appointment-with');
+    var meetLinkEl = document.getElementById('appointment-meet-link');
+
+    // Parse events passed from Flask to the template
+    var events = {{ events | tojson }};
+
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      events: events, // Use the pre-loaded events from Flask
+
+      eventClick: function(info) {
+        // Fill in appointment details dynamically
+        titleEl.textContent = 'Title: ' + info.event.title;
+        descriptionEl.textContent = 'Description: ' + info.event.extendedProps.description;
+        materialEl.textContent = 'Material: ' + info.event.extendedProps.material_url;
+        withEl.textContent = 'With: ' + info.event.extendedProps.with;
+        meetLinkEl.href = info.event.extendedProps.google_meet_link;
+        meetLinkEl.textContent = info.event.extendedProps.google_meet_link;
+
+        // Show the details section
+        detailsEl.classList.remove('hidden');
+      }
+    });
+
+    calendar.render();
+  });
+</script>
+{% endblock %}

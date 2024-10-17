@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<form id="profile-edit-form" method="POST">
+    {{ profile_form.hidden_tag() }}
+
+    <div class="mb-4">
+        {{ profile_form.bio.label }} 
+        {{ profile_form.bio(class="form-input mt-1 block w-full") }}
+    </div>
+
+    <div class="mb-4">
+        {{ profile_form.profile_picture.label }} 
+        {{ profile_form.profile_picture(class="form-input mt-1 block w-full") }}
+    </div>
+
+    <div class="mb-4">
+        {{ profile_form.country.label }} 
+        <select id="country-select" name="country" class="form-input mt-1 block w-full">
+            {% for country in countries %}
+                <option value="{{ country }}">{{ country }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="mb-4">
+        {{ profile_form.level.label }} 
+        {{ profile_form.level(class="form-select mt-1 block w-full") }}
+    </div>
+
+    <div class="mb-4">
+        {{ profile_form.subject.label }}
+        <div id="subject-checkboxes">
+            {% for subject in subjects %}
+                <label>
+                    <input type="checkbox" name="subject" value="{{ subject }}"> {{ subject }}
+                </label><br>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="mb-4">
+        <label for="timezone" class="block mb-2">Time Zone</label>
+        <select id="timezone" name="timezone" class="form-input mt-1 block w-full">
+            {% for timezone in timezones %}
+                <option value="{{ timezone }}">{{ timezone }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded mt-4">Save Changes</button>
+</form>
+
+{% endblock %}
