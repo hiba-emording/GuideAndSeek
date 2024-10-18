@@ -37,6 +37,8 @@ class User(db.Model, UserMixin):
     appointments_received = relationship('Appointment', back_populates='teacher', foreign_keys='Appointment.teacher_id', lazy=True, cascade="all, delete-orphan")
     reviews = relationship("Review", back_populates="teacher", cascade="all, delete-orphan", foreign_keys="[Review.teacher_id]")
 
+    notifications = relationship('Notification', back_populates='user', cascade="all, delete-orphan", lazy=True)
+
     def to_dict(self):
         """Return a dictionary representation of the user."""
         return {
@@ -96,7 +98,7 @@ class Appointment(db.Model):
     id = Column(Integer, primary_key=True)
     student_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     teacher_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    slot_time = Column(DateTime, nullable=False)
+    slot_time = Column(DateTime, nullable=False, index=True)  # Adding index for performance
     status = Column(String(20), default=PENDING)
     cancel_reason = Column(Text, nullable=True)
     title = Column(String(100), nullable=False)
@@ -115,9 +117,23 @@ class Review(db.Model):
     id = Column(Integer, primary_key=True)
     comment = Column(Text, nullable=False)
     rating = Column(Integer, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
 
     student_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     teacher_id = Column(Integer, ForeignKey('users.id'), nullable=False)
 
     teacher = relationship("User", back_populates="reviews", foreign_keys=[teacher_id])
     student = relationship("User", foreign_keys=[student_id])
+
+
+class Notification(db.Model):
+    """Model to handle notifications."""
+    __tablename__ = 'notifications'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, ForeignKey('users.id'), nullable=False)
+    message = db.Column(db.String(255), nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    read = db.Column(db.Boolean, default=False)
+
+    user = db.relationship('User', back_populates='notifications')
