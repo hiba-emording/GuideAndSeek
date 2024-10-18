@@ -8,26 +8,32 @@
         <div class="mt-4">
             {{ form.title.label(class="text-lg font-semibold text-purple-700") }} 
             {{ form.title(class="form-input mt-1 block w-full border border-purple-300 rounded-md focus:ring focus:ring-purple-500") }}
+            <p class="text-sm text-gray-600">Enter the subject or title of the appointment (e.g., "Math Tutoring Session").</p>
         </div>
         
         <div class="mt-4">
             {{ form.description.label(class="text-lg font-semibold text-purple-700") }} 
             {{ form.description(class="form-textarea mt-1 block w-full border border-purple-300 rounded-md focus:ring focus:ring-purple-500") }}
+            <p class="text-sm text-gray-600">Provide a brief description of what you'd like to discuss or learn during the appointment.</p>
         </div>
         
         <div class="mt-4">
             {{ form.material_url.label(class="text-lg font-semibold text-purple-700") }} 
             {{ form.material_url(class="form-input mt-1 block w-full border border-purple-300 rounded-md focus:ring focus:ring-purple-500") }}
+            <p class="text-sm text-gray-600">Include any relevant links to materials (optional).</p>
         </div>
         
         <div class="mt-4">
             {{ form.slot_time.label(class="text-lg font-semibold text-purple-700") }} 
             {{ form.slot_time(class="form-select mt-1 block w-full border border-purple-300 rounded-md focus:ring focus:ring-purple-500") }}
+            <p class="text-sm text-gray-600">Select an available time slot for your appointment.</p>
+            <p class="text-sm text-gray-600">Make sure your timezone is set in your profile settings.</p>
         </div>
 
         <div class="mt-4">
             {{ form.google_meet_link.label(class="text-lg font-semibold text-purple-700") }} 
             {{ form.google_meet_link(class="form-input mt-1 block w-full border border-purple-300 rounded-md focus:ring focus:ring-purple-500") }}
+            <p class="text-sm text-gray-600">The Google Meet link SHOULD be scheduled based on your CHOOSEN slot above. Provide a valid link.</p>
         </div>
 
         <div class="mt-6">

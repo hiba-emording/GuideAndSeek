@@ -3,17 +3,38 @@
 {% block content %}
 <div class="container mx-auto p-6 bg-purple-50 rounded-lg shadow-lg">
   <h2 class="text-3xl font-bold mb-4 text-purple-800">Your Appointments</h2>
-  
+
   <!-- Calendar -->
-  <div id="calendar" class="mb-6 bg-light-orange-100 rounded shadow-lg"></div>
+  <div id="calendar" class="mb-6 bg-gray-100 p-4 rounded-lg shadow-lg"></div>
 
   <!-- Appointment Details Section (hidden by default) -->
-  <div id="appointment-details" class="bg-white p-4 shadow rounded hidden">
-    <h3 class="text-xl font-semibold mb-2 text-purple-600" id="appointment-title"></h3>
-    <p id="appointment-description" class="text-orange-700"></p>
-    <p id="appointment-material" class="text-orange-700"></p>
-    <p id="appointment-with" class="text-orange-700"></p>
-    <p><strong class="text-purple-600">Google Meet Link:</strong> <a href="#" id="appointment-meet-link" target="_blank" class="text-blue-500 underline">Join Meeting</a></p>
+  <div id="appointment-details" class="bg-white p-6 mt-4 shadow rounded-lg hidden">
+    <h3 class="text-2xl font-semibold mb-4 text-purple-600" id="appointment-title"></h3>
+
+    <div class="mb-3">
+      <strong class="text-purple-600">Time:</strong>
+      <p id="appointment-time" class="text-gray-700"></p>
+    </div>
+
+    <div class="mb-3">
+      <strong class="text-purple-600">Description:</strong>
+      <p id="appointment-description" class="text-gray-700"></p>
+    </div>
+
+    <div class="mb-3">
+      <strong class="text-purple-600">Material:</strong>
+      <p id="appointment-material" class="text-gray-700"></p>
+    </div>
+
+    <div class="mb-3">
+      <strong class="text-purple-600">With:</strong>
+      <p id="appointment-with" class="text-gray-700"></p>
+    </div>
+
+    <div class="mb-3">
+      <strong class="text-purple-600">Google Meet Link:</strong>
+      <p><a href="#" id="appointment-meet-link" target="_blank" class="text-blue-500 underline">Join Meeting</a></p>
+    </div>
   </div>
 </div>
 
@@ -22,6 +43,7 @@
     var calendarEl = document.getElementById('calendar');
     var detailsEl = document.getElementById('appointment-details');
     var titleEl = document.getElementById('appointment-title');
+    var timeEl = document.getElementById('appointment-time');
     var descriptionEl = document.getElementById('appointment-description');
     var materialEl = document.getElementById('appointment-material');
     var withEl = document.getElementById('appointment-with');
@@ -37,14 +59,38 @@
       eventClick: function(info) {
         // Fill in appointment details dynamically
         titleEl.textContent = 'Title: ' + info.event.title;
-        descriptionEl.textContent = 'Description: ' + info.event.extendedProps.description;
-        materialEl.textContent = 'Material: ' + info.event.extendedProps.material_url;
-        withEl.textContent = 'With: ' + info.event.extendedProps.with;
+
+        // Format the time and show it
+        var startTime = new Date(info.event.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        var endTime = info.event.end ? new Date(info.event.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'N/A';
+        timeEl.textContent = startTime + ' - ' + endTime;
+
+        descriptionEl.textContent = info.event.extendedProps.description ? info.event.extendedProps.description : 'No description';
+        materialEl.textContent = info.event.extendedProps.material_url ? info.event.extendedProps.material_url : 'No materials';
+        withEl.textContent = info.event.extendedProps.with ? info.event.extendedProps.with : 'Not specified';
         meetLinkEl.href = info.event.extendedProps.google_meet_link;
         meetLinkEl.textContent = info.event.extendedProps.google_meet_link;
 
         // Show the details section
         detailsEl.classList.remove('hidden');
+      },
+      eventContent: function(info) {
+        // Custom event rendering in the calendar
+        let subjectEl = document.createElement('div');
+        subjectEl.classList.add('font-semibold', 'text-orange-600');
+        subjectEl.textContent = info.event.title;
+
+        let timeEl = document.createElement('div');
+        timeEl.classList.add('text-gray-700');
+        let startTime = new Date(info.event.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        let endTime = info.event.end ? new Date(info.event.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'N/A';
+        timeEl.textContent = startTime + ' - ' + endTime;
+
+        let withEl = document.createElement('div');
+        withEl.classList.add('text-orange-700');
+        withEl.textContent = 'With: ' + (info.event.extendedProps.with || 'Not specified');
+
+        return { domNodes: [subjectEl, timeEl, withEl] };
       }
     });
 

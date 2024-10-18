@@ -45,39 +45,49 @@
 
         <!-- Review Form -->
         <div id="reviewForm" class="mt-6 hidden">
-            <h3 class="text-lg font-semibold text-purple-300 text-center">Leave a Review</h3>
-            <form action="{{ url_for('api.leave_review', teacher_id=user.id) }}" method="POST">
-                {{ review_form.hidden_tag() }}
-                <div class="mb-4">
-                    <label for="rating" class="block text-sm font-medium text-gray-300">Rating:</label>
-                    {{ review_form.rating(class="block w-full mt-1") }}
-                </div>
-                <div class="mb-4">
-                    <label for="comment" class="block text-sm font-medium text-gray-300">Comment:</label>
-                    {{ review_form.comment(class="block w-full mt-1") }}
-                </div>
-                <button type="submit" class="bg-purple-500 text-white px-6 py-2 rounded hover:bg-purple-600 transition">Submit Review</button>
-            </form>
+          <h3 class="text-lg font-semibold text-purple-300 text-center">Leave a Review</h3>
+          <form action="{{ url_for('api.leave_review', teacher_id=user.id) }}" method="POST">
+              {{ review_form.hidden_tag() }}
+              
+              <div class="mb-4">
+                  <label for="rating" class="block text-sm font-medium text-gray-300">Rating:</label>
+                  {{ review_form.rating(class="block w-full mt-1") }}
+                  <p class="text-sm text-gray-500">Please rate from 1 (lowest) to 5 (highest).</p>
+              </div>
+              
+              <div class="mb-4">
+                  <label for="comment" class="block text-sm font-medium text-gray-300">Comment:</label>
+                  {{ review_form.comment(class="block w-full mt-1") }}
+                  <p class="text-sm text-gray-500">Please provide a thoughtful and professional comment.</p>
+              </div>
+              
+              <button type="submit" class="bg-purple-500 text-white px-6 py-2 rounded hover:bg-purple-600 transition">Submit Review</button>
+          </form>
         </div>
+
       {% endif %}
 
       {% if user.role == 'teacher' %}
       <!-- Show reviews only for teacher profiles -->
       <h3 class="text-2xl font-bold mt-8 text-purple-300">Reviews</h3>
       <div>
-          {% for review in reviews.items %}
-          <div class="bg-gray-800 p-4 my-2 rounded-lg shadow-sm">
-              <p class="text-gray-300"><strong>Rating:</strong> {{ review.rating }} / 5</p>
-              <p class="text-gray-300"><strong>Comment:</strong> {{ review.comment or 'No comment' }}</p>
-              <p class="text-gray-300">
-                  <strong>Reviewed by:</strong>
-                  <a href="{{ url_for('api.view_profile', user_id=review.student_id) }}" class="text-purple-500 hover:underline">
-                      {{ review.student.username }}
-                  </a>
-              </p>
-          </div>
-          {% endfor %}
-      </div>      
+        {% if reviews.items|length > 0 %}
+            {% for review in reviews.items %}
+            <div class="bg-gray-800 p-4 my-2 rounded-lg shadow-sm">
+                <p class="text-gray-300"><strong>Rating:</strong> {{ review.rating }} / 5</p>
+                <p class="text-gray-300"><strong>Comment:</strong> {{ review.comment or 'No comment' }}</p>
+                <p class="text-gray-300">
+                    <strong>Reviewed by:</strong>
+                    <a href="{{ url_for('api.view_profile', user_id=review.student_id) }}" class="text-purple-500 hover:underline">
+                        {{ review.student.username }}
+                    </a>
+                </p>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-gray-400">This teacher has no reviews yet.</p>
+        {% endif %}
+    </div>
 
       <!-- Pagination -->
       <div class="mt-4">
