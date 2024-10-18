@@ -1,11 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
+
 <div class="bg-gray-200 p-4 rounded-lg mb-6">
-    <h2 class="text-purple-600">Welcome, {{ current_user.username }}!</h2>
+    <h2 class="text-purple-600">Welcome, <strong>{{ current_user.username }}</strong>!</h2>
     {% if next_appointment %}
     <p class="text-gray-700">
         Your next appointment is on <strong>{{ next_appointment.slot_time.strftime('%Y-%m-%d %H:%M') }}</strong> with
-        <strong>{{ next_appointment.teacher.username if current_user.role == 'student' else next_appointment.student.username }}</strong>.
+        <strong>{{ next_appointment.teacher.username }}</strong>.
     </p>
     <a href="{{ url_for('api.calendar') }}" class="bg-orange-400 text-white px-4 py-2 rounded hover:bg-orange-500 transition mt-2 inline-block">View in Calendar</a>
     {% endif %}
