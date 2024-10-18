@@ -16,6 +16,10 @@
     <!-- Suggested Teachers (horizontal scrollable box) -->
     <div class="mb-8">
         <h2 class="text-2xl font-bold mb-4 text-purple-600">Suggested Teachers</h2>
+        {% if message %}
+        <p class="text-red-500 mb-4">{{ message }}</p>
+        <a href="{{ url_for('api.edit_profile') }}" class="text-blue-500 underline">Edit Profile</a>
+        {% endif %}
         <div class="relative">
             <!-- Left Arrow -->
             <button id="left-arrow" class="absolute left-0 top-1/2 transform -translate-y-1/2 bg-gray-300 text-gray-700 px-2 py-1 rounded-l hover:bg-gray-400 transition">
@@ -27,7 +31,7 @@
                 {% for teacher in suggested_teachers %}
                 <div class="inline-block w-64 p-4 bg-white shadow-md rounded-lg transition transform hover:shadow-lg hover:scale-105">
                     <h3 class="text-xl font-bold text-purple-600">
-                        <a href="{{ url_for('api.view_profile', teacher_id=teacher.id) }}" class="text-blue-500 hover:underline">
+                        <a href="{{ url_for('api.view_profile', user_id=teacher.id) }}" class="text-blue-500 hover:underline">
                             {{ teacher.username }}
                         </a>
                     </h3>

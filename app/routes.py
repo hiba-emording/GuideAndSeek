@@ -23,15 +23,15 @@ def home():
     next_appointment = get_next_appointment()
 
     if current_user.role == 'student':
-        suggested_teachers = get_suggested_teachers(current_user.subject)
+        query = User.query.filter_by(role='teacher')
+        query = query.join(Availability).filter(Availability.teacher_id == User.id).distinct()
+        suggested_teachers, message = get_suggested_teachers(current_user.subject)
 
         filters = {
             'level': request.args.get('level'),
             'subject': request.args.get('subject'),
             'country': request.args.get('country')
         }
-
-        query = User.query.filter_by(role='teacher')
 
         if filters['level']:
             query = query.filter(User.level == filters['level'])
@@ -45,6 +45,7 @@ def home():
 
         return render_template('student_home.html',
                                suggested_teachers=suggested_teachers,
+                               message=message,
                                teachers=paginated_teachers,
                                next_appointment=next_appointment,
                                filters=filters)
@@ -116,6 +117,7 @@ def list_teachers():
     }
 
     query = User.query.filter_by(role='teacher')
+    query = query.join(Availability).filter(Availability.teacher_id == User.id).distinct()
 
     if filters['level']:
         query = query.filter(User.level == filters['level'])
@@ -142,7 +144,7 @@ def view_profile(user_id):
             user.bio = profile_form.bio.data
             user.profile_picture = profile_form.profile_picture.data
             user.country = profile_form.country.data
-            user.time_zone = profile_form.time_zone.data
+            user.timezone = profile_form.timezone.data
             user.level = profile_form.level.data
 
             selected_subjects = request.form.getlist('subject')  
@@ -182,6 +184,12 @@ def view_profile(user_id):
 @login_required
 def edit_profile():
     form = ProfileEditForm(obj=current_user)
+    if current_user.subject:
+        form.subject.data = current_user.subject.split(',')
+    if current_user.country:
+        form.country.data = current_user.country
+    if current_user.time_zone:
+        form.timezone.data = current_user.time_zone
 
     with open('app/static/data/countries.json') as f:
         countries = json.load(f)
@@ -212,7 +220,8 @@ def edit_profile():
     return render_template('edit_profile.html', 
                            profile_form=form,
                            countries=countries, 
-                           subjects=subjects, timezones=timezones)
+                           subjects=subjects, 
+                           timezones=timezones)
 
 
 @api.route('/leave_review/<int:teacher_id>', methods=['GET', 'POST'])
@@ -249,9 +258,16 @@ def leave_review(teacher_id):
 @login_required
 def set_availability():
     if current_user.role != 'teacher':
-        return redirect(url_for('home'))
+        return redirect(url_for('api.home'))
+
+    if not current_user.time_zone:
+        flash('Please set your time zone in your profile before setting availability.', 'warning')
+        return redirect(url_for('api.edit_profile'))
 
     availability_id = request.args.get('availability_id')
+    today = datetime.now(pytz.timezone(current_user.time_zone)).weekday()
+    days_of_week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    
     if availability_id:
         availability = Availability.query.get_or_404(availability_id)
         if availability.teacher_id != current_user.id:
@@ -262,6 +278,12 @@ def set_availability():
         form = AvailabilityForm()
 
     if form.validate_on_submit():
+        selected_day = days_of_week.index(form.day_of_week.data)
+        now_in_teacher_tz = datetime.now(pytz.timezone(current_user.time_zone))
+
+        if selected_day < today or (selected_day == today and form.start_time.data < now_in_teacher_tz.time()):
+            flash('You cannot set availability for past times or days.', 'error')
+            return redirect(url_for('api.set_availability'))
         if availability_id:
             availability.day_of_week = form.day_of_week.data
             availability.start_time = form.start_time.data
@@ -337,10 +359,11 @@ def book_appointment(teacher_id):
     if form.validate_on_submit():
         selected_slot_time = parser.parse(form.slot_time.data)
         teacher_timezone = teacher.time_zone
+
         slot_time = convert_time(selected_slot_time, teacher_timezone, student_timezone)
 
         if slot_time.tzinfo is None:
-            slot_time = slot_time.astimezone(student_timezone)
+            slot_time = slot_time.astimezone(pytz.timezone(student_timezone))
 
         new_appointment = Appointment(
             student_id=current_user.id,
@@ -352,7 +375,7 @@ def book_appointment(teacher_id):
             google_meet_link=form.google_meet_link.data,
             status=Appointment.PENDING
         )
-        
+
         confirmed_slots = Appointment.query.filter_by(teacher_id=teacher_id, status=Appointment.CONFIRMED).all()
         if is_time_slot_available(slot_time, slot_time + timedelta(hours=1), confirmed_slots, student_timezone):
             db.session.add(new_appointment)
@@ -375,14 +398,16 @@ def book_appointment(teacher_id):
 
 
 def generate_available_slots(teacher, student_timezone, session_duration=60):
+    """Generate available time slots for the teacher, excluding past slots."""
     slots = []
     availabilities = Availability.query.filter_by(teacher_id=teacher.id).all()
-    
+
     confirmed_slots = Appointment.query.filter_by(teacher_id=teacher.id, status=Appointment.CONFIRMED).all()
-    confirmed_slot_times = [appointment.slot_time for appointment in confirmed_slots]
+    confirmed_slot_times = [convert_time(appointment.slot_time, teacher.time_zone, student_timezone) for appointment in confirmed_slots]
 
     teacher_timezone = teacher.time_zone
-    
+    now_in_teacher_tz = datetime.now(pytz.timezone(teacher_timezone))
+
     for availability in availabilities:
         start = datetime.combine(datetime.today(), availability.start_time)
         end = datetime.combine(datetime.today(), availability.end_time)
@@ -390,8 +415,11 @@ def generate_available_slots(teacher, student_timezone, session_duration=60):
         start = pytz.timezone(teacher_timezone).localize(start)
         end = pytz.timezone(teacher_timezone).localize(end)
 
+        if start < now_in_teacher_tz:
+            continue
+
         while start < end:
-            if start not in confirmed_slot_times:
+            if not any(start == confirmed_time for confirmed_time in confirmed_slot_times):
                 converted_slot = convert_time(start, teacher_timezone, student_timezone)
                 slots.append(converted_slot)
             start += timedelta(minutes=session_duration)
@@ -399,7 +427,9 @@ def generate_available_slots(teacher, student_timezone, session_duration=60):
     return slots
 
 
+
 def is_time_slot_available(new_slot_start, new_slot_end, confirmed_slots, student_timezone):
+    """Check if a new slot overlaps with confirmed slots."""
     student_timezone = pytz.timezone(student_timezone)
 
     for confirmed_slot in confirmed_slots:
@@ -429,15 +459,23 @@ def get_next_appointment():
 
 
 def get_suggested_teachers(current_user_subject):
+
     if not current_user_subject:
-        return []
+        return ([], "We cannot find suitable matches. Consider adding new subjects to your profile.")
+
+    user_subjects = [subject.strip() for subject in current_user_subject.split(',')]
 
     suggested_teachers = User.query.filter(
-        User.role == 'teacher',
-        User.subject.ilike(f"%{current_user_subject}%")
-    ).limit(5).all()
+        User.role == 'teacher'
+    ).filter(
+        or_(*[User.subject.ilike(f"%{subject}%") for subject in user_subjects])
+    ).join(Availability).filter(Availability.teacher_id == User.id).distinct().limit(5).all()
 
-    return suggested_teachers
+
+    if not suggested_teachers:
+        return ([], "We cannot find suitable matches. Consider adding new subjects to your profile.")
+
+    return (suggested_teachers, None)
 
 
 @api.route('/calendar', methods=['GET'])
