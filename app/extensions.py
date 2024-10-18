@@ -10,10 +10,10 @@ from flask_wtf.csrf import CSRFProtect
 import pytz
 
 
-db = SQLAlchemy()  # Make sure this is correctly initialized
+db = SQLAlchemy()
 bcrypt = Bcrypt()
 migrate = Migrate()
-session = Session()  # lowercase 's' to avoid confusion with the class
+session = Session()
 login_manager = LoginManager()
 socketio = SocketIO()
 csrf = CSRFProtect()

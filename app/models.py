@@ -21,7 +21,7 @@ class User(db.Model, UserMixin):
     username = Column(String(MAX_USERNAME_LENGTH), unique=True, nullable=False, index=True)
     email = Column(String(MAX_EMAIL_LENGTH), unique=True, nullable=False, index=True)
     password_hash = Column(String(MAX_PASSWORD_HASH_LENGTH), nullable=False)
-    email_confirmed = Column(Boolean, default=True)
+    email_confirmed = Column(Boolean, default=False)
     bio = Column(Text, nullable=True)
     profile_picture = Column(String(1024), nullable=True)
     role = Column(String(MAX_ROLE_LENGTH), nullable=False)
