@@ -2,54 +2,58 @@
 
 {% block content %}
 
-<form id="profile-edit-form" method="POST">
-    {{ profile_form.hidden_tag() }}
+<div class="w-full p-6 bg-gray-800 rounded-lg shadow-lg">
+    <h2 class="text-2xl font-semibold text-orange-300 mb-6 font-poppins">Edit Profile</h2>
+    
+    <form id="profile-edit-form" method="POST" class="w-full">
+        {{ profile_form.hidden_tag() }}
 
-    <div class="mb-4">
-        {{ profile_form.bio.label }} 
-        {{ profile_form.bio(class="form-input mt-1 block w-full") }}
-    </div>
-
-    <div class="mb-4">
-        {{ profile_form.profile_picture.label }} 
-        {{ profile_form.profile_picture(class="form-input mt-1 block w-full") }}
-    </div>
-
-    <div class="mb-4">
-        {{ profile_form.country.label }} 
-        <select id="country-select" name="country" class="form-input mt-1 block w-full">
-            {% for country in countries %}
-                <option value="{{ country }}">{{ country }}</option>
-            {% endfor %}
-        </select>
-    </div>
-
-    <div class="mb-4">
-        {{ profile_form.level.label }} 
-        {{ profile_form.level(class="form-select mt-1 block w-full") }}
-    </div>
-
-    <div class="mb-4">
-        {{ profile_form.subject.label }}
-        <div id="subject-checkboxes">
-            {% for subject in subjects %}
-                <label>
-                    <input type="checkbox" name="subject" value="{{ subject }}"> {{ subject }}
-                </label><br>
-            {% endfor %}
+        <div class="mb-4">
+            {{ profile_form.bio.label(class='block text-gray-200') }} 
+            {{ profile_form.bio(class="form-input mt-1 block w-full rounded-lg border border-gray-300 bg-gray-700 text-gray-200 placeholder-gray-400 focus:ring focus:ring-orange-300") }}
         </div>
-    </div>
 
-    <div class="mb-4">
-        <label for="timezone" class="block mb-2">Time Zone</label>
-        <select id="timezone" name="timezone" class="form-input mt-1 block w-full">
-            {% for timezone in timezones %}
-                <option value="{{ timezone }}">{{ timezone }}</option>
-            {% endfor %}
-        </select>
-    </div>
+        <div class="mb-4">
+            {{ profile_form.profile_picture.label(class='block text-gray-200') }} 
+            {{ profile_form.profile_picture(class="form-input mt-1 block w-full rounded-lg border border-gray-300 bg-gray-700 text-gray-200 placeholder-gray-400 focus:ring focus:ring-orange-300") }}
+        </div>
 
-    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded mt-4">Save Changes</button>
-</form>
+        <div class="mb-4">
+            {{ profile_form.country.label(class='block text-gray-200') }} 
+            <select id="country-select" name="country" class="form-input mt-1 block w-full rounded-lg border border-gray-300 bg-gray-700 text-gray-200 focus:ring focus:ring-orange-300">
+                {% for country in countries %}
+                    <option value="{{ country }}">{{ country }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-4">
+            {{ profile_form.level.label(class='block text-gray-200') }} 
+            {{ profile_form.level(class="form-select mt-1 block w-full rounded-lg border border-gray-300 bg-gray-700 text-gray-200 placeholder-gray-400 focus:ring focus:ring-orange-300") }}
+        </div>
+
+        <div class="mb-4">
+            <label for="subject" class="block mb-2 text-gray-200">Subjects</label>
+            <div id="subject-checkboxes" class="space-y-2">
+                {% for subject in subjects %}
+                    <label class="flex items-center text-gray-200">
+                        <input type="checkbox" name="subject" value="{{ subject }}" class="mr-2 rounded text-purple-600 focus:ring focus:ring-orange-300"> {{ subject }}
+                    </label>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <label for="timezone" class="block mb-2 text-gray-200">Time Zone</label>
+            <select id="timezone" name="timezone" class="form-input mt-1 block w-full rounded-lg border border-gray-300 bg-gray-700 text-gray-200 focus:ring focus:ring-orange-300">
+                {% for timezone in timezones %}
+                    <option value="{{ timezone }}">{{ timezone }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white font-bold px-4 py-2 rounded mt-4 transition duration-200">Save Changes</button>
+    </form>
+</div>
 
 {% endblock %}
