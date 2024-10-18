@@ -6,6 +6,41 @@
 
 {% block content %}
 <div class="container mx-auto p-6">
-    <h1 class="text-3xl font-bold text-center text-blue-600 mb-6">Welcome to GuideAndSeek</h1>
+    <h1 class="text-3xl font-bold text-center text-orange-500 mb-2">GuideAndSeek</h1>
+    <h2 class="text-lg text-center text-orange-400 mb-6">Cause Google Doesn’t Have All the Answers!</h2>
+    
+    <div class="bg-gray-800 shadow-lg rounded-lg p-8 max-w-2xl mx-auto border border-gray-600">
+        <p class="text-gray-200 mb-4">
+            Remember those childhood days when homework felt like a game of hide and seek? We used to dodge our parents, slipping away to avoid studying.
+        </p>
+
+        <p class="text-gray-200 mb-4">
+            As we grew up, we realized that learning is not just a chore but a treasure. It opens doors, sparks creativity, and connects us to the world.
+        </p>
+
+        <p class="text-gray-200 mb-4">
+            In GuideAndSeek, we’re not just connecting students with teachers; we’re helping you rediscover the joy of learning. Our platform is about making knowledge accessible, engaging, and personalized.
+        </p>
+
+        <p class="text-gray-200 mb-4">
+            Whether you're a student eager to learn or a teacher passionate about sharing knowledge, GuideAndSeek is the place for you.
+        </p>
+
+        <p class="text-gray-200 mb-4">
+            Here are some of the exciting features you can expect:
+        </p>
+
+        <ul class="list-disc list-inside text-orange-300 mb-4">
+            <li><strong>Personalized Learning</strong>: Tailor sessions based on your learning style and needs.</li>
+            <li><strong>Flexible Scheduling</strong>: Teachers set their availability, making it easy to find a time that works for you.</li>
+            <li><strong>Diverse Subjects</strong>: Explore a variety of subjects, from math and science to arts and languages.</li>
+        </ul>
+
+        <p class="text-center">
+            <a href="{{ url_for('auth.register') }}" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out">
+                Join us Today!
+            </a>
+        </p>
+    </div>
 </div>
 {% endblock %}
