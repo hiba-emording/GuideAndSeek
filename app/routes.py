@@ -51,7 +51,6 @@ def home():
                                filters=filters)
 
     elif current_user.role == 'teacher':
-
         form = AvailabilityForm()
         if form.validate_on_submit():
             new_availability = Availability(
@@ -75,34 +74,39 @@ def home():
             appointment = Appointment.query.get(appointment_id)
 
             try:
-                appointment.status = Appointment.CONFIRMED
-                other_requests = Appointment.query.filter_by(
-                    teacher_id=appointment.teacher_id,
-                    slot_time=appointment.slot_time,
-                    status=Appointment.PENDING
-                ).all()
+                if action == 'accept':
+                    appointment.status = Appointment.CONFIRMED
+                    other_requests = Appointment.query.filter_by(
+                        teacher_id=appointment.teacher_id,
+                        slot_time=appointment.slot_time,
+                        status=Appointment.PENDING
+                    ).all()
 
-                for other_request in other_requests:
-                    if other_request.id != appointment.id:
-                        other_request.status = Appointment.DECLINED
-                        other_request.cancel_reason = "Automatically declined due to another booking."
+                    for other_request in other_requests:
+                        if other_request.id != appointment.id:
+                            other_request.status = Appointment.DECLINED
+                            other_request.cancel_reason = "Automatically declined due to another booking."
 
-                db.session.commit()
+                    db.session.commit()
 
-                socketio.emit('appointment_confirmation', {
-                    'student_id': appointment.student_id,
-                    'teacher_name': current_user.username,
-                    'appointment_title': appointment.title,
-                    'appointment_time': appointment.slot_time.isoformat(),
-                }, namespace='/notifications')
+                    socketio.emit('appointment_confirmation', {
+                        'student_id': appointment.student_id,
+                        'teacher_name': current_user.username,
+                        'appointment_title': appointment.title,
+                        'appointment_time': appointment.slot_time.isoformat(),
+                    }, namespace='/notifications')
 
-                flash('Appointment confirmed. Other overlapping requests have been declined.')
+                    flash('Appointment confirmed. Other overlapping requests have been declined.')
+
+                elif action == 'decline':
+                    appointment.status = Appointment.DECLINED
+                    appointment.cancel_reason = "Appointment declined by the teacher."
+                    db.session.commit()
+                    flash('Appointment declined successfully.')
 
             except IntegrityError:
                 db.session.rollback()
                 flash('An error occurred while processing the appointment. Please try again.')
-
-
 
         return render_template('teacher_home.html', form=form, availabilities=availabilities, appointment_details=pending_requests, next_appointment=next_appointment, user=current_user)
 
