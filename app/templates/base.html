@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}GuideAndSeek{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
@@ -12,8 +14,6 @@
     
     <!-- FullCalendar JS -->
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
-    <!-- Link the separated JavaScript file -->
-    <script src="{{ url_for('static', filename='js/calendar.js') }}"></script>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -47,64 +47,101 @@
     </style>
 </head>
 <body class="flex flex-col min-h-screen bg-gray-100 text-gray-800">
-    <!-- Upper Navigation Bar -->
     <nav class="bg-[#7F56D9] text-white p-4 shadow">
-        <div class="container mx-auto flex justify-between items-center">
-            <div class="flex items-center space-x-4">
-                {% if current_user.is_authenticated %}
-                <div class="relative group">
+        <!-- Desktop Navigation -->
+        <div class="container mx-auto hidden md:flex justify-center space-x-8">
+            {% if current_user.is_authenticated %}
+                <!-- Home -->
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-home text-2xl"></i>
                     <a href="{{ url_for('api.home', user_id=current_user.id) }}" class="hover:text-[#FBBF24]">Home</a>
                 </div>
-                <div class="relative group">
+    
+                <!-- Calendar -->
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-calendar-alt text-2xl"></i>
                     <a href="{{ url_for('api.calendar', user_id=current_user.id) }}" class="hover:text-[#FBBF24]">My Calendar</a>
                 </div>
-                <div class="relative group">
-                    <a href="javascript:void(0);" class="hover:text-[#FBBF24]">Notifications</a>
+    
+                <!-- Notifications -->
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-bell text-2xl"></i>
+                    <a href="#" class="hover:text-[#FBBF24]">Notifications</a>
                 </div>
-                <div class="relative group">
+    
+                <!-- Profile -->
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-user text-2xl"></i>
                     <a href="{{ url_for('api.view_profile', user_id=current_user.id) }}" class="hover:text-[#FBBF24]">Profile</a>
                 </div>
-                <div class="relative group">
+    
+                <!-- Logout -->
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-sign-out-alt text-2xl"></i>
                     <a href="{{ url_for('auth.logout') }}" class="hover:text-[#FBBF24]">Logout</a>
                 </div>
-                {% else %}
-                <div class="relative group">
+            {% else %}
+                <!-- About -->
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-info-circle text-2xl"></i>
                     <a href="{{ url_for('auth.index') }}" class="hover:text-[#FBBF24]">About</a>
                 </div>
-                <div class="relative group">
+    
+                <!-- Register -->
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-user-plus text-2xl"></i>
                     <a href="{{ url_for('auth.register') }}" class="hover:text-[#FBBF24]">Register</a>
                 </div>
-                <div class="relative group">
+    
+                <!-- Login -->
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-sign-in-alt text-2xl"></i>
                     <a href="{{ url_for('auth.login') }}" class="hover:text-[#FBBF24]">Login</a>
                 </div>
-                {% endif %}
-            </div>
-
-            <!-- Mobile Menu Button -->
-            <div class="block md:hidden">
-                <button id="menu-button" class="text-white focus:outline-none">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
-                    </svg>
-                </button>
-            </div>
-        </div>
-
-        <!-- Mobile Menu -->
-        <div id="menu" class="hidden md:hidden flex flex-col space-y-2 p-4">
-            {% if current_user.is_authenticated %}
-                <a href="{{ url_for('api.home', user_id=current_user.id) }}" class="hover:underline">Home</a>
-                <a href="{{ url_for('api.calendar', user_id=current_user.id) }}" class="hover:underline">My Calendar</a>
-                <a href="#" class="hover:underline">Notifications</a>
-                <a href="{{ url_for('api.view_profile', user_id=current_user.id) }}" class="hover:underline">Profile</a>
-                <a href="{{ url_for('auth.logout') }}" class="hover:underline">Logout</a>
-            {% else %}
-                <a href="{{ url_for('auth.index') }}" class="hover:underline">About</a>
-                <a href="{{ url_for('auth.register') }}" class="hover:underline">Register</a>
-                <a href="{{ url_for('auth.login') }}" class="hover:underline">Login</a>
             {% endif %}
         </div>
-    </nav>
+    
+        <!-- Mobile Navigation -->
+        <div class="block md:hidden">
+            <!-- Mobile Menu Button -->
+            <button id="menu-button" class="text-white focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                </svg>
+            </button>
+        </div>
+    
+        <!-- Mobile Dropdown Menu -->
+        <div id="menu" class="hidden md:hidden flex flex-col space-y-2 p-4">
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('api.home', user_id=current_user.id) }}" class="flex items-center hover:underline">
+                    <i class="fas fa-home text-xl"></i> <span class="ml-2">Home</span>
+                </a>
+                <a href="{{ url_for('api.calendar', user_id=current_user.id) }}" class="flex items-center hover:underline">
+                    <i class="fas fa-calendar-alt text-xl"></i> <span class="ml-2">My Calendar</span>
+                </a>
+                <a href="#" class="flex items-center hover:underline">
+                    <i class="fas fa-bell text-xl"></i> <span class="ml-2">Notifications</span>
+                </a>
+                <a href="{{ url_for('api.view_profile', user_id=current_user.id) }}" class="flex items-center hover:underline">
+                    <i class="fas fa-user text-xl"></i> <span class="ml-2">Profile</span>
+                </a>
+                <a href="{{ url_for('auth.logout') }}" class="flex items-center hover:underline">
+                    <i class="fas fa-sign-out-alt text-xl"></i> <span class="ml-2">Logout</span>
+                </a>
+            {% else %}
+                <a href="{{ url_for('auth.index') }}" class="flex items-center hover:underline">
+                    <i class="fas fa-info-circle text-xl"></i> <span class="ml-2">About</span>
+                </a>
+                <a href="{{ url_for('auth.register') }}" class="flex items-center hover:underline">
+                    <i class="fas fa-user-plus text-xl"></i> <span class="ml-2">Register</span>
+                </a>
+                <a href="{{ url_for('auth.login') }}" class="flex items-center hover:underline">
+                    <i class="fas fa-sign-in-alt text-xl"></i> <span class="ml-2">Login</span>
+                </a>
+            {% endif %}
+        </div>
+    </nav>    
 
     <!-- Main Content -->
     <div class="content flex-grow p-4 bg-white shadow-md rounded-md">
@@ -127,7 +164,6 @@
         socket.on('new_review', function(data) {
             displayNotification('New Review', data.message, 'info');
         });
-
 
         socket.on('appointment_request', function(data) {
             displayNotification('New Appointment Request', `${data.student_name} requested an appointment for ${data.appointment_title}`, 'info');
