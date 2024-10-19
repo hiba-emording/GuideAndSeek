@@ -34,7 +34,7 @@
 
         <div class="mb-4">
             <label for="subject" class="block mb-2 text-gray-200">Subjects</label>
-            <div id="subject-checkboxes" class="space-y-2">
+            <div id="subject-checkboxes" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {% for subject in subjects %}
                     <label class="flex items-center text-gray-200">
                         <input type="checkbox" name="subject" value="{{ subject }}" class="mr-2 rounded text-purple-600 focus:ring focus:ring-orange-300"> {{ subject }}
