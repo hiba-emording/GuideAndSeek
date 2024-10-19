@@ -19,3 +19,6 @@ Jinja2              # Templating engine
 SQLAlchemy           # SQL toolkit and ORM
 gevent              # Asynchronous networking for SocketIO
 mailjet_rest==1.3.4
+pytz
+itsdangerous
+dateutil
