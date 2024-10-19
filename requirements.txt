@@ -21,4 +21,4 @@ gevent              # Asynchronous networking for SocketIO
 mailjet_rest==1.3.4
 pytz
 itsdangerous
-dateutil
+python-dateutil
