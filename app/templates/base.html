@@ -143,10 +143,46 @@
         </div>
     </nav>    
 
+<!-- Flash Messages -->
+<div class="container mx-auto mt-4">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flex flex-col space-y-4">
+                {% for category, message in messages %}
+                    <div class="p-4 text-white {{ 'bg-green-500' if category == 'success' else 'bg-red-500' }} rounded-md shadow-md relative transition-all duration-300" id="flash-message-{{ loop.index }}">
+                        <button class="absolute top-1 right-2 text-white hover:text-gray-300" onclick="closeFlashMessage('flash-message-{{ loop.index }}')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        {{ message }}
+                    </div>
+
+                    <script>
+                        setTimeout(function() {
+                            closeFlashMessage('flash-message-{{ loop.index }}');
+                        }, 3000);
+                    </script>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+</div>
+
     <!-- Main Content -->
     <div class="content flex-grow p-4 bg-white shadow-md rounded-md">
         {% block content %}{% endblock %}
     </div>
+
+    <script>
+        function closeFlashMessage(messageId) {
+            var messageElement = document.getElementById(messageId);
+            if (messageElement) {
+                messageElement.classList.add('opacity-0');
+                setTimeout(function() {
+                    messageElement.remove();
+                }, 300);
+            }
+        }
+    </script>
 
     <!-- Socket.IO Notification Handlers -->
     <script>

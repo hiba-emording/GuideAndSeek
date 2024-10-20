@@ -55,11 +55,11 @@
         </div>
         <div>
             <label for="subject" class="block text-sm font-medium text-purple-600">Subject</label>
-            <input type="text" name="subject" id="subject" value="{{ filters.subject }}" class="form-input mt-1 block w-full border-gray-300 rounded-md">
+            <input type="text" name="subject" id="subject" value="{{ filters.subject or '' }}" class="form-input mt-1 block w-full border-gray-300 rounded-md">
         </div>
         <div>
             <label for="country" class="block text-sm font-medium text-purple-600">Country</label>
-            <input type="text" name="country" id="country" value="{{ filters.country }}" class="form-input mt-1 block w-full border-gray-300 rounded-md">
+            <input type="text" name="country" id="country" value="{{ filters.country or '' }}" class="form-input mt-1 block w-full border-gray-300 rounded-md">
         </div>
         <div class="flex items-end">
             <button type="submit" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition">Search</button>

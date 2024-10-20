@@ -102,6 +102,14 @@ def home():
                     appointment.status = Appointment.DECLINED
                     appointment.cancel_reason = "Appointment declined by the teacher."
                     db.session.commit()
+                    
+                    socketio.emit('appointment_declined', {
+                        'student_id': appointment.student_id,
+                        'teacher_name': current_user.username,
+                        'appointment_title': appointment.title,
+                        'appointment_time': appointment.slot_time.isoformat(),
+                    }, namespace='/notifications')
+                
                     flash('Appointment declined successfully.')
 
             except IntegrityError:
