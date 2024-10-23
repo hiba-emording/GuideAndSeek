@@ -449,7 +449,9 @@ def generate_available_slots(teacher, student_timezone, session_duration=60):
             continue
 
         while start < end:
-            if (start > now_in_teacher_tz) and not any(start == confirmed_time for confirmed_time in confirmed_slot_times):
+            new_slot_end = start + timedelta(minutes=session_duration)
+            if (start > now_in_teacher_tz and 
+                is_time_slot_available(start, new_slot_end, confirmed_slots, student_timezone)):
                 converted_slot = convert_time(start, teacher_timezone, student_timezone)
                 slots.append(converted_slot)
             start += timedelta(minutes=session_duration)
@@ -523,7 +525,7 @@ def calendar():
 
     events = [{
         'id': appointment.id,
-        'title': f"{appointment.title} (with {appointment.teacher.username if current_user.role == 'student' else appointment.student.username})",
+        'title': appointment.title,
         'start': appointment.slot_time.isoformat(),
         'end': (appointment.slot_time + timedelta(hours=1)).isoformat(),
         'description': appointment.description,
