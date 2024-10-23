@@ -12,6 +12,11 @@
     <h3 class="text-2xl font-semibold mb-4 text-orange-700" id="appointment-title"></h3>
 
     <div class="mb-3">
+      <strong class="text-purple-600">With:</strong>
+      <p id="appointment-with" class="text-gray-700"></p>
+    </div>
+
+    <div class="mb-3">
       <strong class="text-purple-600">Time:</strong>
       <p id="appointment-time" class="text-gray-700"></p>
     </div>
@@ -24,11 +29,6 @@
     <div class="mb-3">
       <strong class="text-purple-600">Material:</strong>
       <p id="appointment-material" class="text-gray-700"></p>
-    </div>
-
-    <div class="mb-3">
-      <strong class="text-purple-600">With:</strong>
-      <p id="appointment-with" class="text-gray-700"></p>
     </div>
 
     <div class="mb-3">
@@ -79,18 +79,13 @@
         let contentEl = document.createElement('div');
 
         let subjectEl = document.createElement('div');
-        subjectEl.classList.add('font-semibold', 'text-orange-600');
+        subjectEl.classList.add('font-semibold', 'text-sm', 'text-orange-600');
         subjectEl.textContent = info.event.title;
 
         let timeEl = document.createElement('div');
-        timeEl.classList.add('text-gray-700');
+        timeEl.classList.add('text-gray-700', 'text-xs');
         let startTime = new Date(info.event.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        let endTime = info.event.end ? new Date(info.event.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'N/A';
-        timeEl.textContent = startTime + ' - ' + endTime;
-
-        let withEl = document.createElement('div');
-        withEl.classList.add('text-orange-700');
-        withEl.textContent = 'With: ' + (info.event.extendedProps.with || 'Not specified');
+        timeEl.textContent = startTime;
 
         contentEl.appendChild(subjectEl);
         contentEl.appendChild(timeEl);

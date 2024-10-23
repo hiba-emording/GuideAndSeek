@@ -26,7 +26,7 @@
         
         <div class="mt-4">
             {{ form.slot_time.label(class="text-lg font-semibold text-purple-700") }} 
-            {{ form.slot_time(class="form-select mt-1 block w-full border border-purple-300 rounded-md focus:ring focus:ring-purple-500") }}
+            {{ form.slot_time(class="form-select mt-1 block w-full border border-purple-300 rounded-md focus:ring focus:ring-purple-500", id="slot_time") }}
             <p class="text-sm text-gray-600">Select an available time slot for your appointment.</p>
             <p class="text-sm text-gray-600">Make sure your timezone is set in your profile settings.</p>
         </div>
@@ -42,30 +42,4 @@
         </div>
     </form>
 </div>
-
-<script>
-// This JS can be loaded on the student booking page to refresh available slots dynamically if needed
-
-document.addEventListener('DOMContentLoaded', function() {
-    const daySelect = document.getElementById('day-of-week');
-    const slotsSelect = document.getElementById('slot-time');
-
-    daySelect.addEventListener('change', function() {
-        const selectedDay = this.value;
-
-        // Send AJAX request to fetch available slots for selected day
-        fetch(`/api/available-slots/${selectedDay}`)
-            .then(response => response.json())
-            .then(data => {
-                slotsSelect.innerHTML = '';
-                data.slots.forEach(slot => {
-                    const option = document.createElement('option');
-                    option.value = slot.value;
-                    option.textContent = slot.text;
-                    slotsSelect.appendChild(option);
-                });
-            });
-    });
-});
-</script>
 {% endblock %}

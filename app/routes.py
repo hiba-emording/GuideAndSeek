@@ -53,6 +53,10 @@ def home():
     elif current_user.role == 'teacher':
         form = AvailabilityForm()
         if form.validate_on_submit():
+            error_message = validate_availability(form, current_user)
+            if error_message:
+                return error_message
+
             new_availability = Availability(
                 teacher_id=current_user.id,
                 day_of_week=form.day_of_week.data,
@@ -266,61 +270,50 @@ def leave_review(teacher_id):
     return render_template('view_profile.html', form=review_form, teacher=teacher)
 
 
-@api.route('/teacher/availability', methods=['GET', 'POST'])
-@login_required
-def set_availability():
-    if current_user.role != 'teacher':
-        return redirect(url_for('api.home'))
-
+def validate_availability(form, current_user):
     if not current_user.time_zone:
         flash('Please set your time zone in your profile before setting availability.', 'warning')
         return redirect(url_for('api.edit_profile'))
 
-    availability_id = request.args.get('availability_id')
     today = datetime.now(pytz.timezone(current_user.time_zone)).weekday()
     days_of_week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-    
-    if availability_id:
-        availability = Availability.query.get_or_404(availability_id)
-        if availability.teacher_id != current_user.id:
-            flash('Unauthorized access.')
-            return redirect(url_for('api.set_availability'))
-        form = AvailabilityForm(obj=availability)
-    else:
-        form = AvailabilityForm()
+
+    selected_day = days_of_week.index(form.day_of_week.data)
+    now_in_teacher_tz = datetime.now(pytz.timezone(current_user.time_zone))
+
+    if selected_day < today or (selected_day == today and form.start_time.data < now_in_teacher_tz.time()):
+        flash('You cannot set availability for past times or days.', 'error')
+        return redirect(url_for('api.home'))
+
+    return None
+
+
+@api.route('/teacher/availability/edit/<int:availability_id>', methods=['GET', 'POST'])
+@login_required
+def edit_availability(availability_id):
+
+    availability = Availability.query.get_or_404(availability_id)
+
+    if availability.teacher_id != current_user.id:
+        flash('Unauthorized access.', 'error')
+        return redirect(url_for('api.home'))
+
+    form = AvailabilityForm(obj=availability)
 
     if form.validate_on_submit():
-        selected_day = days_of_week.index(form.day_of_week.data)
-        now_in_teacher_tz = datetime.now(pytz.timezone(current_user.time_zone))
+        error_message = validate_availability(form, current_user)
+        if error_message:
+            return error_message
 
-        if selected_day < today or (selected_day == today and form.start_time.data < now_in_teacher_tz.time()):
-            flash('You cannot set availability for past times or days.', 'error')
-            return redirect(url_for('api.set_availability'))
-        if availability_id:
-            availability.day_of_week = form.day_of_week.data
-            availability.start_time = form.start_time.data
-            availability.end_time = form.end_time.data
-            db.session.commit()
-            flash('Availability updated successfully!')
-        else:
-            add_availability(form, current_user.id)
-            flash('Availability added successfully!')
-        return redirect(url_for('api.set_availability'))
+        availability.day_of_week = form.day_of_week.data
+        availability.start_time = form.start_time.data
+        availability.end_time = form.end_time.data
+        db.session.commit()
 
-    availabilities = Availability.query.filter_by(teacher_id=current_user.id).all()
-    return render_template('teacher_home.html', form=form, availabilities=availabilities)
+        flash('Availability updated successfully!', 'success')
+        return redirect(url_for('api.home'))
 
-
-def add_availability(form, teacher_id):
-    """Add availability for a teacher"""
-    new_availability = Availability(
-        teacher_id=teacher_id,
-        day_of_week=form.day_of_week.data,
-        start_time=form.start_time.data,
-        end_time=form.end_time.data
-    )
-    db.session.add(new_availability)
-    db.session.commit()
+    return render_template('teacher_home.html', form=form)
 
 
 @api.route('/teacher/availability/delete/<int:availability_id>', methods=['POST'])
@@ -330,13 +323,13 @@ def delete_availability(availability_id):
     
     if availability.teacher_id != current_user.id:
         flash('Unauthorized action.')
-        return redirect(url_for('api.set_availability'))
+        return redirect(url_for('api.home'))
     
     db.session.delete(availability)
     db.session.commit()
     
     flash('Availability deleted successfully!')
-    return redirect(url_for('api.set_availability'))
+    return redirect(url_for('api.home'))
 
 
 def convert_time(dt, from_timezone, to_timezone):
@@ -412,18 +405,43 @@ def book_appointment(teacher_id):
 def generate_available_slots(teacher, student_timezone, session_duration=60):
     """Generate available time slots for the teacher, excluding past slots."""
     slots = []
-    availabilities = Availability.query.filter_by(teacher_id=teacher.id).all()
 
-    confirmed_slots = Appointment.query.filter_by(teacher_id=teacher.id, status=Appointment.CONFIRMED).all()
-    confirmed_slot_times = [convert_time(appointment.slot_time, teacher.time_zone, student_timezone) for appointment in confirmed_slots]
+    availabilities = Availability.query.filter_by(teacher_id=teacher.id).all()
+    confirmed_slots = Appointment.query.filter_by(
+        teacher_id=teacher.id,
+        status=Appointment.CONFIRMED
+    ).all()
+
+    confirmed_slot_times = [
+        convert_time(appointment.slot_time, teacher.time_zone, student_timezone)
+        for appointment in confirmed_slots
+    ]
 
     teacher_timezone = teacher.time_zone
     now_in_teacher_tz = datetime.now(pytz.timezone(teacher_timezone))
 
+    days_of_week = {
+        'Monday': 0,
+        'Tuesday': 1,
+        'Wednesday': 2,
+        'Thursday': 3,
+        'Friday': 4,
+        'Saturday': 5,
+        'Sunday': 6
+    }
+
     for availability in availabilities:
-        start = datetime.combine(datetime.today(), availability.start_time)
-        end = datetime.combine(datetime.today(), availability.end_time)
+        day_of_week = availability.day_of_week
+        if day_of_week not in days_of_week:
+            continue
+
+        today = datetime.today()
+        days_ahead = (days_of_week[day_of_week] - today.weekday() + 7) % 7
         
+        day = today + timedelta(days=days_ahead)
+        start = datetime.combine(day, availability.start_time)
+        end = datetime.combine(day, availability.end_time)
+
         start = pytz.timezone(teacher_timezone).localize(start)
         end = pytz.timezone(teacher_timezone).localize(end)
 
@@ -431,13 +449,12 @@ def generate_available_slots(teacher, student_timezone, session_duration=60):
             continue
 
         while start < end:
-            if not any(start == confirmed_time for confirmed_time in confirmed_slot_times):
+            if (start > now_in_teacher_tz) and not any(start == confirmed_time for confirmed_time in confirmed_slot_times):
                 converted_slot = convert_time(start, teacher_timezone, student_timezone)
                 slots.append(converted_slot)
             start += timedelta(minutes=session_duration)
 
     return slots
-
 
 
 def is_time_slot_available(new_slot_start, new_slot_end, confirmed_slots, student_timezone):
@@ -462,9 +479,15 @@ def is_time_slot_available(new_slot_start, new_slot_end, confirmed_slots, studen
 
 
 def get_next_appointment():
+    current_time = datetime.now(pytz.timezone(current_user.time_zone))
+
     next_appointment = Appointment.query.filter(
-        or_(Appointment.student_id == current_user.id, Appointment.teacher_id == current_user.id),
-        Appointment.status == Appointment.CONFIRMED
+        or_(
+            Appointment.student_id == current_user.id, 
+            Appointment.teacher_id == current_user.id
+        ),
+        Appointment.status == Appointment.CONFIRMED,
+        Appointment.slot_time > current_time
     ).order_by(Appointment.slot_time).first()
     
     return next_appointment
